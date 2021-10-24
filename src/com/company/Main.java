@@ -242,6 +242,7 @@ class BattleShipController {
         while (true) {
             try {
                 Point beginningCoordinate = getCoordinate(scanner);
+
                 Point endCoordinate = getCoordinate(scanner);
 
 
@@ -265,8 +266,9 @@ class BattleShipController {
             this.showStage();
             break;
 
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
+            } catch(NumberFormatException|InputMismatchException e) {
+                System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
+                scanner.nextLine();
             }
         }
 
