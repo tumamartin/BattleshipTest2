@@ -18,7 +18,7 @@ class ShipPoint extends Point {
     }
 
     public void setShot(boolean shot) {
-        isShot = shot;
+        this.isShot = shot;
     }
 }
 
@@ -47,8 +47,11 @@ class Ship {
 class Stage {
     private Ship[] ships;
 
+    private boolean[][] hits;
+
     public Stage() {
         ships = new Ship[5];
+        this.hits = new boolean[11][11];
     }
 
     public Ship[] getShips() {
@@ -57,6 +60,14 @@ class Stage {
 
     public void setShips(Ship[] ships) {
         this.ships = ships;
+    }
+
+    public boolean[][] getHits() {
+        return hits;
+    }
+
+    public void setHit(Point point) {
+        this.hits[point.x][point.y] = true;
     }
 }
 
@@ -86,7 +97,7 @@ class BattleShipController {
                     System.out.print(characterToDraw);
                     characterToDraw++;
                 } else {
-                    System.out.print("~");
+                    System.out.print(this.stage.getHits()[i][j] == false ? "~" : "M");
                 }
                 if (j < 10) {
                     System.out.print(" ");
@@ -280,15 +291,47 @@ class BattleShipController {
         putShipIntoStage("Submarine", 3);
         putShipIntoStage("Cruiser", 3);
         putShipIntoStage("Destroyer", 2);
-        System.out.println("The game starts!");
     }
 
+    public void startGame() {
+        System.out.println("The game starts!");
+        this.showStage();
+    }
+
+    public void shotShip(Point point) {
+        for (Ship ship : this.stage.getShips()) {
+            if (ship != null) {
+                for (ShipPoint shipPoint : ship.getShipPoints()) {
+                    if (shipPoint.equals(point)) {
+                        shipPoint.setShot(true);
+                    }
+                }
+            }
+
+        }
+
+    }
+
+
     public void shot() {
-        try {
-            Point shotCoordinate = getCoordinate(scanner);
-        } catch (Exception e){
-            System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
-            scanner.nextLine();
+        System.out.println("Take a shot!");
+        while (true) {
+            try {
+                Point shotCoordinate = getCoordinate(scanner);
+                if (!pointIsShip(shotCoordinate)) {
+                    this.stage.getHits()[shotCoordinate.x][shotCoordinate.y] = true;
+                    this.showStage();
+                    System.out.println("You missed!");
+                } else {
+                    shotShip(shotCoordinate);
+                    this.showStage();
+                    System.out.println("You hit a ship!");
+                }
+                break;
+            } catch (Exception e) {
+                System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
+                scanner.nextLine();
+            }
         }
     }
 
@@ -302,6 +345,9 @@ public class Main {
 	BattleShipController battleShipController = new BattleShipController(stage, scanner);
     battleShipController.showStage();
 	battleShipController.populateStage();
+
+    battleShipController.startGame();
+    battleShipController.shot();
 
     }
 }
