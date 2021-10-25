@@ -178,7 +178,7 @@ class BattleShipController {
         coordinate.x = Character.getNumericValue(scannedCoordinate.charAt(0)) - 9;
         coordinate.y = Integer.parseInt(scannedCoordinate.substring(1));
         if (coordinate.x < 1 || coordinate.x > 10 || coordinate.y < 1 || coordinate.y > 10) {
-            throw new InputMismatchException("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
+            throw new InputMismatchException();
         } else {
             return coordinate;
         }
@@ -267,7 +267,7 @@ class BattleShipController {
             break;
 
             } catch(NumberFormatException|InputMismatchException e) {
-                System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
+                System.out.println("Error, coordinates must have the following format: XN XN, X = A - J, N = 1 - 10.");
                 scanner.nextLine();
             }
         }
@@ -280,7 +280,18 @@ class BattleShipController {
         putShipIntoStage("Submarine", 3);
         putShipIntoStage("Cruiser", 3);
         putShipIntoStage("Destroyer", 2);
+        System.out.println("The game starts!");
     }
+
+    public void shot() {
+        try {
+            Point shotCoordinate = getCoordinate(scanner);
+        } catch (Exception e){
+            System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
+            scanner.nextLine();
+        }
+    }
+
 }
 
 public class Main {
