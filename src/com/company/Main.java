@@ -81,13 +81,13 @@ class BattleShipController {
         this.scanner = scanner;
     }
 
-    public void showStage() {
+    public void showStage(boolean fog) {
         char characterToDraw = 'A';
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
                 if (pointIsShot(new Point(i,j))) {
                     System.out.print("X");
-                }else if (pointIsShip(new Point(i,j))) {
+                }else if (pointIsShip(new Point(i,j)) && !fog) {
                     System.out.print("O");
                 } else if (i == 0 && j == 0) {
                     System.out.print(" ");
@@ -274,7 +274,7 @@ class BattleShipController {
             }
 
             putShipIntoStageArray(getShip(beginningCoordinate, endCoordinate, name));
-            this.showStage();
+            this.showStage(false);
             break;
 
             } catch(NumberFormatException|InputMismatchException e) {
@@ -295,7 +295,7 @@ class BattleShipController {
 
     public void startGame() {
         System.out.println("The game starts!");
-        this.showStage();
+        this.showStage(true);
     }
 
     public void shotShip(Point point) {
@@ -320,11 +320,11 @@ class BattleShipController {
                 Point shotCoordinate = getCoordinate(scanner);
                 if (!pointIsShip(shotCoordinate)) {
                     this.stage.getHits()[shotCoordinate.x][shotCoordinate.y] = true;
-                    this.showStage();
+                    this.showStage(true);
                     System.out.println("You missed!");
                 } else {
                     shotShip(shotCoordinate);
-                    this.showStage();
+                    this.showStage(true);
                     System.out.println("You hit a ship!");
                 }
                 break;
@@ -343,11 +343,12 @@ public class Main {
 	Stage stage = new Stage();
 	Scanner scanner = new Scanner(System.in);
 	BattleShipController battleShipController = new BattleShipController(stage, scanner);
-    battleShipController.showStage();
+    battleShipController.showStage(false);
 	battleShipController.populateStage();
 
     battleShipController.startGame();
     battleShipController.shot();
+    battleShipController.showStage(false);
 
     }
 }
