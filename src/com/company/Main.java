@@ -61,7 +61,7 @@ class Stage {
     private boolean[][] hits;
 
     public Stage() {
-        ships = new Ship[5];
+        ships = new Ship[1];
         this.hits = new boolean[11][11];
     }
 
@@ -84,21 +84,19 @@ class Stage {
 
 
 class BattleShipController {
-    private Stage stage;
     private Scanner scanner;
 
-    public BattleShipController (Stage stage, Scanner scanner) {
-        this.stage = stage;
+    public BattleShipController (Scanner scanner) {
         this.scanner = scanner;
     }
 
-    public void showStage(boolean fog) {
+    public void showStage(Stage stage, boolean fog) {
         char characterToDraw = 'A';
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
-                if (pointIsShot(new Point(i,j))) {
+                if (pointIsShot(stage, new Point(i,j))) {
                     System.out.print("X");
-                }else if (pointIsShip(new Point(i,j)) && !fog) {
+                }else if (pointIsShip(stage, new Point(i,j)) && !fog) {
                     System.out.print("O");
                 } else if (i == 0 && j == 0) {
                     System.out.print(" ");
@@ -108,7 +106,7 @@ class BattleShipController {
                     System.out.print(characterToDraw);
                     characterToDraw++;
                 } else {
-                    System.out.print(this.stage.getHits()[i][j] == false ? "~" : "M");
+                    System.out.print(!stage.getHits()[i][j] ? "~" : "M");
                 }
                 if (j < 10) {
                     System.out.print(" ");
@@ -119,8 +117,8 @@ class BattleShipController {
     }
 
 
-    public boolean pointIsShip(Point point) {
-        for (Ship ship : this.stage.getShips()) {
+    public boolean pointIsShip(Stage stage, Point point) {
+        for (Ship ship : stage.getShips()) {
             if (ship != null) {
                 for (ShipPoint shipPoint : ship.getShipPoints()) {
                     if (shipPoint.equals(point)) {
@@ -133,8 +131,8 @@ class BattleShipController {
         return false;
     }
 
-    public boolean pointIsShot(Point point) {
-        for (Ship ship : this.stage.getShips()) {
+    public boolean pointIsShot(Stage stage, Point point) {
+        for (Ship ship : stage.getShips()) {
             if (ship != null) {
                 for (ShipPoint shipPoint : ship.getShipPoints()) {
                     if (shipPoint.equals(point) && shipPoint.isShot()) {
@@ -147,35 +145,35 @@ class BattleShipController {
         return false;
     }
 
-    private boolean checkFromLeft(Point point) {
+    private boolean checkFromLeft(Stage stage, Point point) {
         if (point.x == 10) {
             return false;
-        } else return (pointIsShip(new Point(point.x + 1, point.y)));
+        } else return (pointIsShip(stage, new Point(point.x + 1, point.y)));
     }
 
-    private boolean checkFromRight(Point point) {
+    private boolean checkFromRight(Stage stage, Point point) {
         if (point.x == 1) {
             return false;
-        } else return (pointIsShip(new Point(point.x - 1, point.y)));
+        } else return (pointIsShip(stage, new Point(point.x - 1, point.y)));
     }
 
-    private boolean checkFromUp(Point point) {
+    private boolean checkFromUp(Stage stage, Point point) {
         if (point.y == 10) {
             return false;
-        } else return (pointIsShip(new Point(point.x, point.y + 1)));
+        } else return (pointIsShip(stage, new Point(point.x, point.y + 1)));
     }
 
-    private boolean checkFromDown(Point point) {
+    private boolean checkFromDown(Stage stage, Point point) {
         if (point.y == 1) {
             return false;
-        } else return (pointIsShip(new Point(point.x, point.y - 1)));
+        } else return (pointIsShip(stage, new Point(point.x, point.y - 1)));
     }
 
 
-    private boolean checkAll(Point point) {
-        return checkFromLeft(point) || checkFromRight(point) ||
-                checkFromUp(point) || checkFromDown(point) ||
-                pointIsShip(point);
+    private boolean checkAll(Stage stage, Point point) {
+        return checkFromLeft(stage, point) || checkFromRight(stage, point) ||
+                checkFromUp(stage, point) || checkFromDown(stage, point) ||
+                pointIsShip(stage, point);
     }
 
     public boolean checkShipLength(Point beginningCoordinate, Point endCoordinate, int shipLength) {
@@ -239,19 +237,19 @@ class BattleShipController {
         return ship;
     }
 
-    public boolean checkPuttingShip(Ship ship) {
+    public boolean checkPuttingShip(Stage stage, Ship ship) {
         for (Point point : ship.getShipPoints()) {
-            if (checkAll(point)) {
+            if (checkAll(stage, point)) {
                 return false;
             }
         }
         return true;
     }
 
-    private void putShipIntoStageArray(Ship ship) {
-        for (int i = 0; i < this.stage.getShips().length; i++) {
-            if (this.stage.getShips()[i] == null) {
-                this.stage.getShips()[i] = ship;
+    private void putShipIntoStageArray(Stage stage, Ship ship) {
+        for (int i = 0; i < stage.getShips().length; i++) {
+            if (stage.getShips()[i] == null) {
+                stage.getShips()[i] = ship;
                 return;
             }
         }
@@ -259,7 +257,9 @@ class BattleShipController {
 
 
 
-    public void putShipIntoStage(String name, int length) {
+    public void putShipIntoStage(Stage stage, int playerNumber, String name, int length) {
+        System.out.println("Player " + playerNumber + ", place your ships on the game field");
+        showStage(stage, false);
         System.out.println("Enter the coordinates of the " + name + " (" + length + " cells):");
         while (true) {
             try {
@@ -279,13 +279,13 @@ class BattleShipController {
                 System.out.println("Error! Wrong length of the " + name + "! Try again:");
                 continue;
             }
-            if (!checkPuttingShip(getShip(beginningCoordinate, endCoordinate, name))) {
+            if (!checkPuttingShip(stage, getShip(beginningCoordinate, endCoordinate, name))) {
                 System.out.println("Error! You placed it too close to another one. Try again:");
                 continue;
             }
 
-            putShipIntoStageArray(getShip(beginningCoordinate, endCoordinate, name));
-            this.showStage(false);
+            putShipIntoStageArray(stage, getShip(beginningCoordinate, endCoordinate, name));
+            showStage(stage, false);
             break;
 
             } catch(NumberFormatException|InputMismatchException e) {
@@ -296,16 +296,16 @@ class BattleShipController {
 
     }
 
-    public void populateStage() {
-        putShipIntoStage("Aircraft Carrier", 5);
-        putShipIntoStage("Battleship", 4);
-        putShipIntoStage("Submarine", 3);
-        putShipIntoStage("Cruiser", 3);
-        putShipIntoStage("Destroyer", 2);
+    public void populateStage(Stage stage, int playerNumber) {
+        //putShipIntoStage(stage, playerNumber,"Aircraft Carrier", 5);
+       // putShipIntoStage(stage, playerNumber,"Battleship", 4);
+       // putShipIntoStage(stage, playerNumber,"Submarine", 3);
+       // putShipIntoStage(stage, playerNumber,"Cruiser", 3);
+        putShipIntoStage(stage, playerNumber,"Destroyer", 2);
     }
 
-    public void shotShip(Point point) {
-        for (Ship ship : this.stage.getShips()) {
+    public void shotShip(Stage stage, Point point) {
+        for (Ship ship : stage.getShips()) {
             if (ship != null) {
                 for (ShipPoint shipPoint : ship.getShipPoints()) {
                     if (shipPoint.equals(point)) {
@@ -318,9 +318,9 @@ class BattleShipController {
 
     }
 
-    public boolean checkSunkShip() {
+    public boolean checkSunkShip(Stage stage) {
         int shotsInShip;
-        for (Ship ship : this.stage.getShips()) {
+        for (Ship ship : stage.getShips()) {
             shotsInShip = 0;
             if (ship.isAlive()) {
                 for (ShipPoint shipPoint : ship.getShipPoints()) {
@@ -339,35 +339,39 @@ class BattleShipController {
 
 
 
-    public boolean checkEndGame() {
-        for (Ship ship : this.stage.getShips()) {
+    public boolean checkEndGame(Stage stage) {
+        for (Ship ship : stage.getShips()) {
                 if (ship.isAlive()) {return false;}
         }
         return true;
     }
 
 
-    public void game() {
-        System.out.println("The game starts!");
-        this.showStage(true);
-        System.out.println("Take a shot!");
+    public void game(Stage[] stages, int playerNumber) {
+        showStage(stages[0], true);
+        System.out.println("---------------------");
+        showStage(stages[playerNumber], false);
+        System.out.println("Player " + playerNumber + ", it's your turn:");
+        int otherStage = playerNumber == 1 ? 2 : 1;
         while (true) {
             try {
                 Point shotCoordinate = getCoordinate(scanner);
-                if (!pointIsShip(shotCoordinate)) {
-                    this.stage.getHits()[shotCoordinate.x][shotCoordinate.y] = true;
-                    this.showStage(true);
+                if (!pointIsShip(stages[otherStage], shotCoordinate)) {
+                    stages[otherStage].getHits()[shotCoordinate.x][shotCoordinate.y] = true;
                     System.out.println("You missed!");
+                    break;
                 } else {
-                    this.shotShip(shotCoordinate);
-                    this.showStage(true);
-                    if (this.checkSunkShip() && !this.checkEndGame()) {
+                    shotShip(stages[otherStage], shotCoordinate);
+                    showStage(stages[otherStage],  true);
+                    if (checkSunkShip(stages[otherStage]) && !checkEndGame(stages[otherStage])) {
                         System.out.println("You sank a ship! Specify a new target:");
-                    } else if (this.checkEndGame()) {
+                        break;
+                    } else if (checkEndGame(stages[otherStage])) {
                         System.out.println("You sank the last ship. You won. Congratulations!");
                         break;
                     } else {
                         System.out.println("You hit a ship!");
+                        break;
                     }
                 }
 
@@ -378,19 +382,27 @@ class BattleShipController {
         }
     }
 
+    public void passToAnotherPlayer() {
+        System.out.println("Press Enter and pass the move to another player");
+        String enter = scanner.next();
+        scanner.nextLine();
+    }
+
 }
 
 public class Main {
 
     public static void main(String[] args) {
-	Stage stage = new Stage();
+    Stage[] stages = new Stage[3];
+    stages[0] = new Stage();
+    stages[1] = new Stage();
+    stages[2] = new Stage();
 	Scanner scanner = new Scanner(System.in);
-	BattleShipController battleShipController = new BattleShipController(stage, scanner);
-    battleShipController.showStage(false);
-	battleShipController.populateStage();
-
-    battleShipController.game();
-    battleShipController.showStage(false);
+	BattleShipController battleShipController = new BattleShipController(scanner);
+	battleShipController.populateStage(stages[1], 1);
+    battleShipController.passToAnotherPlayer();
+    battleShipController.populateStage(stages[2], 2);
+    battleShipController.game(stages, 1);
 
     }
 }
