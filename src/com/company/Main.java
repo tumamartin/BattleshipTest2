@@ -85,9 +85,11 @@ class Stage {
 
 class BattleShipController {
     private Scanner scanner;
+    private boolean gameOn;
 
     public BattleShipController (Scanner scanner) {
         this.scanner = scanner;
+        gameOn = true;
     }
 
     public void showStage(Stage stage, boolean fog) {
@@ -368,6 +370,7 @@ class BattleShipController {
                         break;
                     } else if (checkEndGame(stages[otherStage])) {
                         System.out.println("You sank the last ship. You won. Congratulations!");
+                        setGameOn(false);
                         break;
                     } else {
                         System.out.println("You hit a ship!");
@@ -383,11 +386,18 @@ class BattleShipController {
     }
 
     public void passToAnotherPlayer() {
-        System.out.println("Press Enter and pass the move to another player");
-        String enter = scanner.next();
-        scanner.nextLine();
+            System.out.println("Press Enter and pass the move to another player");
+            scanner.nextLine();
+            String readString = scanner.nextLine();
+        }
+
+    public boolean isGameOn() {
+        return gameOn;
     }
 
+    public void setGameOn(boolean gameOn) {
+        this.gameOn = gameOn;
+    }
 }
 
 public class Main {
@@ -402,7 +412,10 @@ public class Main {
 	battleShipController.populateStage(stages[1], 1);
     battleShipController.passToAnotherPlayer();
     battleShipController.populateStage(stages[2], 2);
-    battleShipController.game(stages, 1);
+    while (battleShipController.isGameOn()) {
+        battleShipController.game(stages, 1);
+        battleShipController.game(stages, 2);
+    }
 
     }
 }
