@@ -1,7 +1,6 @@
 package com.company;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -41,6 +40,18 @@ class Ship {
 
     public void setShipPoints(ShipPoint[] shipPoints) {
         this.shipPoints = shipPoints;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
+    }
+
+    public int getLength() {
+        return length;
     }
 }
 
@@ -293,11 +304,6 @@ class BattleShipController {
         putShipIntoStage("Destroyer", 2);
     }
 
-    public void startGame() {
-        System.out.println("The game starts!");
-        this.showStage(true);
-    }
-
     public void shotShip(Point point) {
         for (Ship ship : this.stage.getShips()) {
             if (ship != null) {
@@ -312,8 +318,38 @@ class BattleShipController {
 
     }
 
+    public boolean checkSunkShip() {
+        int shotsInShip;
+        for (Ship ship : this.stage.getShips()) {
+            shotsInShip = 0;
+            if (ship.isAlive()) {
+                for (ShipPoint shipPoint : ship.getShipPoints()) {
+                    if (shipPoint.isShot()) {
+                        shotsInShip++;
+                    }
+                }
+                if (shotsInShip == ship.getLength()) {
+                    ship.setAlive(false);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-    public void shot() {
+
+
+    public boolean checkEndGame() {
+        for (Ship ship : this.stage.getShips()) {
+                if (ship.isAlive()) {return false;}
+        }
+        return true;
+    }
+
+
+    public void game() {
+        System.out.println("The game starts!");
+        this.showStage(true);
         System.out.println("Take a shot!");
         while (true) {
             try {
@@ -323,11 +359,18 @@ class BattleShipController {
                     this.showStage(true);
                     System.out.println("You missed!");
                 } else {
-                    shotShip(shotCoordinate);
+                    this.shotShip(shotCoordinate);
                     this.showStage(true);
-                    System.out.println("You hit a ship!");
+                    if (this.checkSunkShip() && !this.checkEndGame()) {
+                        System.out.println("You sank a ship! Specify a new target:");
+                    } else if (this.checkEndGame()) {
+                        System.out.println("You sank the last ship. You won. Congratulations!");
+                        break;
+                    } else {
+                        System.out.println("You hit a ship!");
+                    }
                 }
-                break;
+
             } catch (Exception e) {
                 System.out.println("Error, coordinate must have the following format: XN, X = A - J, N = 1 - 10.");
                 scanner.nextLine();
@@ -346,8 +389,7 @@ public class Main {
     battleShipController.showStage(false);
 	battleShipController.populateStage();
 
-    battleShipController.startGame();
-    battleShipController.shot();
+    battleShipController.game();
     battleShipController.showStage(false);
 
     }
