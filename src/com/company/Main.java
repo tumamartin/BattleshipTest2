@@ -61,7 +61,7 @@ class Stage {
     private boolean[][] hits;
 
     public Stage() {
-        ships = new Ship[1];
+        ships = new Ship[5];
         this.hits = new boolean[11][11];
     }
 
@@ -299,10 +299,10 @@ class BattleShipController {
     }
 
     public void populateStage(Stage stage, int playerNumber) {
-        //putShipIntoStage(stage, playerNumber,"Aircraft Carrier", 5);
-       // putShipIntoStage(stage, playerNumber,"Battleship", 4);
-       // putShipIntoStage(stage, playerNumber,"Submarine", 3);
-       // putShipIntoStage(stage, playerNumber,"Cruiser", 3);
+        putShipIntoStage(stage, playerNumber,"Aircraft Carrier", 5);
+        putShipIntoStage(stage, playerNumber,"Battleship", 4);
+        putShipIntoStage(stage, playerNumber,"Submarine", 3);
+        putShipIntoStage(stage, playerNumber,"Cruiser", 3);
         putShipIntoStage(stage, playerNumber,"Destroyer", 2);
     }
 
@@ -412,9 +412,14 @@ public class Main {
 	battleShipController.populateStage(stages[1], 1);
     battleShipController.passToAnotherPlayer();
     battleShipController.populateStage(stages[2], 2);
+    battleShipController.passToAnotherPlayer();
     while (battleShipController.isGameOn()) {
         battleShipController.game(stages, 1);
+        if (!battleShipController.isGameOn()) {break;}
+        battleShipController.passToAnotherPlayer();
         battleShipController.game(stages, 2);
+        if (!battleShipController.isGameOn()) {break;}
+        battleShipController.passToAnotherPlayer();
     }
 
     }
